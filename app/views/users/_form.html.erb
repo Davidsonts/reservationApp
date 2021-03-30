@@ -18,9 +18,10 @@
 
   <div class="field">
     <%= form.label :name %>
-    <%= form.text_field :name %>
+    <%= form.text_field :name %> <br>
+    <%= link_to "Change your password", edit_user_registration_path %>
   </div>
-
+  
   <div class="actions">
     <%= form.submit %>
   </div>
