@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  load_and_authorize_resource
   before_action :set_user, only: %i[ show edit update destroy ]
 
   # GET /users or /users.json
@@ -21,9 +22,6 @@ class UsersController < ApplicationController
 
   # POST /users or /users.json
   def create
-    # puts "Message goes here"
-    # exit
-    # abort("Message goes here")
     @user = User.new(user_params)
 
     respond_to do |format|
@@ -38,28 +36,28 @@ class UsersController < ApplicationController
   end
 
   # PATCH/PUT /users/1 or /users/1.json
-  # def update
-  #   respond_to do |format|
-  #     if @user.update(user_params)
-  #       format.html { redirect_to @user, notice: "User was successfully updated." }
-  #       format.json { render :show, status: :ok, location: @user }
-  #     else
-  #       format.html { render :edit, status: :unprocessable_entity }
-  #       format.json { render json: @user.errors, status: :unprocessable_entity }
-  #     end
-  #   end
-  # end
-
   def update
-    @user = current_user
-
-    if (user_params[:password].blank? && @user.update_without_password(user_params)) || @user.update(user_params)
-      sign_in(@user, bypass: true)
-      redirect_to '/users', notice: 'Your profile changes have been saved.'
-    else
-      render 'edit'
+    respond_to do |format|
+      if (user_params[:password].blank? && @user.update_without_password(user_params)) || @user.update(user_params)
+        format.html { redirect_to @user, notice: "User was successfully updated." }
+        format.json { render :show, status: :ok, location: @user }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
     end
   end
+
+  # def update_password
+  #   @user = current_user
+
+  #   if (user_params[:password].blank? && @user.update_without_password(user_params)) || @user.update(user_params)
+  #     sign_in(@user, bypass: true)
+  #     redirect_to '/users', notice: 'Your profile changes have been saved.'
+  #   else
+  #     render 'edit'
+  #   end
+  # end
 
   # DELETE /users/1 or /users/1.json
   def destroy
