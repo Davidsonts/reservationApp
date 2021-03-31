@@ -29,51 +29,71 @@
               <% reservat = Reservation.find_by(data: "#{day} #{i}:00:00") %>
               <% if reservat  %>
                 <%# debug reservat %>
-                <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %>
+                <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %> <i class="fa fa-undo" aria-hidden="true"></i>
               <% else %>
-                 <%= "Disponivel" %>
-                 <button onclick="openModel('<%= i.to_s + day.to_s %>')">Click me</button>
+                <!-- Button trigger modal -->
+                <a type="button" class="text-primary" data-toggle="modal" data-target="#staticBackdrop-<%= i.to_s + day.to_s %>">
+                  <%= "Disponivel" %>
+                </a>
               <% end %>
             </td>
 
-            <div class="modal-inicial modal-<%= i.to_s + day.to_s %>">
-              <%= form_with(model: reservation) do |form| %>
-
-                <% if reservation.errors.any? %>
-                  <div id="error_explanation">
-                    <h2><%= pluralize(reservation.errors.count, "error") %> prohibited this reservation from being saved:</h2>
-
-                    <ul>
-                      <% reservation.errors.each do |error| %>
-                        <li><%= error.full_message %></li>
-                      <% end %>
-                    </ul>
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop-<%= i.to_s + day.to_s %>" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
                   </div>
-                <% end %>
+                  <div class="modal-body">
+                    <%= form_with(model: reservation) do |form| %>
 
-                <div class="field">
-                  <%= form.hidden_field :data, :value => Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S") %>
-                </div>
+                      <% if reservation.errors.any? %>
+                        <div id="error_explanation">
+                          <h2><%= pluralize(reservation.errors.count, "error") %> prohibited this reservation from being saved:</h2>
 
-                <div class="field">
-                  <%= form.label :description %>
-                  <%= form.text_field :description %>
-                </div>
+                          <ul>
+                            <% reservation.errors.each do |error| %>
+                              <li><%= error.full_message %></li>
+                            <% end %>
+                          </ul>
+                        </div>
+                      <% end %>
 
-                <div class="field">
-                  <% if can? :create, User %>
-                    <%= form.label :user_id %>
-                    <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => 'form-control' }) %>
-                  <% else %>
-                    <%= form.hidden_field :user_id, value: current_user.id %>
-                  <% end %>
-                </div>
+                      <div class="field">
+                        <%= form.hidden_field :data, :value => Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S"), :class => "data-#{i.to_s}#{day.to_s}"  %>
+                      </div>
 
-                <div class="actions">
-                  <%= form.submit %>
+                      <div class="field">
+                        <%= form.label :description %>
+                        <%= form.text_field :description, :class => "description-#{i.to_s}#{day.to_s}" %>
+                      </div>
+
+                      <div class="field">
+                        <% if can? :create, User %>
+                          <%= form.label :user_id %>
+                          <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "user_id-#{i.to_s}#{day.to_s}" }) %>
+                        <% else %>
+                          <%= form.hidden_field :user_id, value: current_user.id, :class => "user_id-#{i.to_s}#{day.to_s}" %>
+                        <% end %>
+                      </div>
+
+                      <div class="actions">
+                        <%= form.submit %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary submit-button" id="<%= i.to_s + day.to_s %>">Confirm</button>
+                  </div>
                 </div>
-              <% end %>
-            <div>
+              </div>
+            </div>
+
           <% end %>
         <% } %>
       </tr>
@@ -84,14 +104,37 @@
 <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %>
 <%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
 
-<style>
-  .modal-inicial {
-    display: none;
-  }
-</style>
 
 <script>
-  function openModel(value) {
-    document.querySelector('.modal-' + value).style.display = "block";
-  }
+    $(document).ready(function () {
+     
+        $('.submit-button').click(function() {
+          console.log(55, $(".data-"+this.id).val());
+            $.ajax({
+                url: "<%= request.base_url %>/api/reservations",
+                // data: JSON.stringify({
+                //             name: $("#name").val(),
+                //             course_id: $("#course_id").val(),
+                //             start_date: $("#start_date").val(),
+                //             end_date: $("#end_date").val(),
+                //             status: $("#batch_status").val(),
+                //         }
+                // ),
+                data: JSON.stringify({
+                    reservation: {
+                        data: $(".data-"+this.id).val(),
+                        description: $("#description-"+this.id).val(),
+                        user_id: $("#user_id-"+this.id).val(),
+                    }
+                }),
+                error: function(error) {
+                	console.log(error);
+                },
+                success: function(data) {
+                    console.log(data);
+                },
+                type: 'POST'
+            });
+        });
+    })
 </script>
