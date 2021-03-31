@@ -32,6 +32,7 @@
                 <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %>
               <% else %>
                  <%= "Disponivel" %>
+                 <button onclick="openModel('<%= i.to_s + day.to_s %>')">Click me</button>
               <% end %>
             </td>
 
@@ -73,7 +74,6 @@
                 </div>
               <% end %>
             <div>
-           
           <% end %>
         <% } %>
       </tr>
@@ -85,7 +85,13 @@
 <%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
 
 <style>
-.modal-inicial {
-  display: block;
-}
+  .modal-inicial {
+    display: none;
+  }
 </style>
+
+<script>
+  function openModel(value) {
+    document.querySelector('.modal-' + value).style.display = "block";
+  }
+</script>
