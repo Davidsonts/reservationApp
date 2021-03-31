@@ -1,32 +1,91 @@
-<%= form_with(model: reservation) do |form| %>
-  <% if reservation.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(reservation.errors.count, "error") %> prohibited this reservation from being saved:</h2>
-
-      <ul>
-        <% reservation.errors.each do |error| %>
-          <li><%= error.full_message %></li>
+<%= "Usuário: #{current_user.name}" %>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Horário</th>
+      <th scope="col">Segunda</th>
+      <th scope="col">Terça</th>
+      <th scope="col">Quarta</th>
+      <th scope="col">Quinta</th>
+      <th scope="col">Sexta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for i in 6..23 %>
+      <tr>
+        <th scope="row"><%= "#{i}:00" %></th> 
+        <% today = Date.today %> 
+        <% begin Date.parse(params[:date]) %>
+          <% today = Date.parse(params[:date]) %> 
+        <% rescue %>
+          <% today = Date.today %> 
         <% end %>
-      </ul>
-    </div>
-  <% end %>
 
-  <div class="field">
-    <%= form.label :data %>
-    <%= form.date_select :data %>
-  </div>
+        <% today = Date.parse(today.beginning_of_week.strftime('%d/%m/%Y')) %>
+        <% (today..(today+6)).each{ |day| %>
+          <% if day.wday != 6 && day.wday != 0 %>
+            <td><%# day %> <%# Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S")%>
 
-  <div class="field">
-    <%= form.label :description %>
-    <%= form.text_field :description %>
-  </div>
+              <% reservat = Reservation.find_by(data: "#{day} #{i}:00:00") %>
+              <% if reservat  %>
+                <%# debug reservat %>
+                <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %>
+              <% else %>
+                 <%= "Disponivel" %>
+              <% end %>
+            </td>
 
-  <div class="field">
-    <%= form.label :user_id %>
-    <%= form.text_field :user_id %>
-  </div>
+            <div class="modal-inicial modal-<%= i.to_s + day.to_s %>">
+              <%= form_with(model: reservation) do |form| %>
 
-  <div class="actions">
-    <%= form.submit %>
-  </div>
-<% end %>
+                <% if reservation.errors.any? %>
+                  <div id="error_explanation">
+                    <h2><%= pluralize(reservation.errors.count, "error") %> prohibited this reservation from being saved:</h2>
+
+                    <ul>
+                      <% reservation.errors.each do |error| %>
+                        <li><%= error.full_message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+
+                <div class="field">
+                  <%= form.hidden_field :data, :value => Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S") %>
+                </div>
+
+                <div class="field">
+                  <%= form.label :description %>
+                  <%= form.text_field :description %>
+                </div>
+
+                <div class="field">
+                  <% if can? :create, User %>
+                    <%= form.label :user_id %>
+                    <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => 'form-control' }) %>
+                  <% else %>
+                    <%= form.hidden_field :user_id, value: current_user.id %>
+                  <% end %>
+                </div>
+
+                <div class="actions">
+                  <%= form.submit %>
+                </div>
+              <% end %>
+            <div>
+           
+          <% end %>
+        <% } %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%# params[:date] %>
+<%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %>
+<%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
+
+<style>
+.modal-inicial {
+  display: block;
+}
+</style>
