@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resources :reservations
-  root :to => "users#index"
+  root :to => "reservations#index"
   resources :users
 
   devise_for :users, skip: [:sessions]
