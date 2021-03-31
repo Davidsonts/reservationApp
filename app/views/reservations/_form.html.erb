@@ -1,5 +1,5 @@
 <%= "Usuário: #{current_user.name}" %>
-<table class="table">
+<table class="table" id="table">
   <thead>
     <tr>
       <th scope="col">Horário</th>
@@ -49,7 +49,7 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                    <%= form_with(model: reservation) do |form| %>
+                    <%= form_with(model: reservation, :class => "form-#{i.to_s}#{day.to_s}") do |form| %>
 
                       <% if reservation.errors.any? %>
                         <div id="error_explanation">
@@ -67,9 +67,10 @@
                         <%= form.hidden_field :data, :value => Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S"), :class => "data-#{i.to_s}#{day.to_s}"  %>
                       </div>
 
-                      <div class="field">
+                      <div class="form-group form-group-<%= i.to_s+day.to_s %>">
                         <%= form.label :description %>
-                        <%= form.text_field :description, :class => "description-#{i.to_s}#{day.to_s}" %>
+                        <%= form.text_field :description, :class => "form-control description-#{i.to_s}#{day.to_s}" %>
+                        <span class="span-<%= i.to_s+day.to_s %>">** preencha o campo</span>
                       </div>
 
                       <div class="field">
@@ -81,9 +82,7 @@
                         <% end %>
                       </div>
 
-                      <div class="actions">
-                        <%= form.submit %>
-                      </div>
+                      
                     <% end %>
                   </div>
                   <div class="modal-footer">
@@ -104,34 +103,32 @@
 <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %>
 <%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
 
-
 <script>
     $(document).ready(function () {
-     
+        var AUTH_TOKEN = $('meta[name=csrf-token]').attr('content');
         $('.submit-button').click(function() {
-          console.log(55, $(".data-"+this.id).val());
+            
+            if (!$(".description-"+this.id).val()) {
+              $(".span-"+this.id).addClass('text-danger');
+              return false
+            }else{
+              $("#staticBackdrop-"+this.id).modal('toggle');
+              $(".span-"+this.id).removeClass('text-danger');
+            }
+
             $.ajax({
-                url: "<%= request.base_url %>/api/reservations",
-                // data: JSON.stringify({
-                //             name: $("#name").val(),
-                //             course_id: $("#course_id").val(),
-                //             start_date: $("#start_date").val(),
-                //             end_date: $("#end_date").val(),
-                //             status: $("#batch_status").val(),
-                //         }
-                // ),
-                data: JSON.stringify({
-                    reservation: {
-                        data: $(".data-"+this.id).val(),
-                        description: $("#description-"+this.id).val(),
-                        user_id: $("#user_id-"+this.id).val(),
-                    }
-                }),
+                url: $(".form-"+this.id).attr("action") + "?&authenticity_token=" + AUTH_TOKEN, 
+                data: $(".form-"+this.id).serialize(),
+                //dataType: "script",
+                type: "json",
                 error: function(error) {
-                	console.log(error);
+                	console.log(111, error);
                 },
                 success: function(data) {
-                    console.log(data);
+                    //console.log(222, data);
+                
+                    $(".table").load("<%= request.base_url %>/reservations/new #table");
+
                 },
                 type: 'POST'
             });
