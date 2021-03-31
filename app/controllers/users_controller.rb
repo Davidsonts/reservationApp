@@ -4,7 +4,11 @@ class UsersController < ApplicationController
 
   # GET /users or /users.json
   def index
-    @users = User.all
+    if current_user.admin == false
+      @users = User.where(:id => current_user.id)
+    else
+      @users = User.all
+    end
   end
 
   # GET /users/1 or /users/1.json
@@ -18,6 +22,9 @@ class UsersController < ApplicationController
 
   # GET /users/1/edit
   def edit
+    if current_user.admin == false && current_user.id != @user.id 
+        redirect_to '/users', notice: 'This modification is not allowed'
+    end
   end
 
   # POST /users or /users.json
