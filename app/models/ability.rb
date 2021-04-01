@@ -18,7 +18,7 @@ class Ability
       can [:read, :new, :create, :update, :destroy], User
       can [:new, :create, :update, :destroy], Reservation
     else
-      can [:read, :update], User
+      can [:update], User
       can [:new, :create, :update, :destroy], Reservation
     end
     #
