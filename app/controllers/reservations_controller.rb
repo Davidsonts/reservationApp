@@ -14,7 +14,7 @@ class ReservationsController < ApplicationController
   # GET /reservations/new
   def new
     @reservation = Reservation.new
-    @users = User.all
+    @users = User.where(admin:false)
   end
 
   # GET /reservations/1/edit
