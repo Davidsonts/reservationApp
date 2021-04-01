@@ -29,7 +29,20 @@
               <% reservat = Reservation.find_by(data: "#{day} #{i}:00:00") %>
               <% if reservat  %>
                 <%# debug reservat %>
-                <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %> <i class="fa fa-undo" aria-hidden="true"></i>
+                <% if current_user.id == reservat[:user_id] || current_user.admin? %>
+                  <a type="button" class="text-dark" data-toggle="modal" data-target="#update-model-<%= i.to_s + day.to_s %>">
+                    <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %> 
+                  </a>
+                <% else %>
+                  <%= "Reservado para  #{User.find_by(id: reservat[:user_id])[:name]}" %>
+                <% end %>
+
+                <% if current_user.id == reservat[:user_id] || current_user.admin? %>
+                  <a type="button" class="text-dark" data-toggle="modal" data-target="#delete-model-<%= i.to_s + day.to_s %>">
+                    <i class="fa fa-undo" aria-hidden="true"></i> 
+                  </a>
+                <% end %>
+
               <% else %>
                 <!-- Button trigger modal -->
                 <a type="button" class="text-primary" data-toggle="modal" data-target="#staticBackdrop-<%= i.to_s + day.to_s %>">
@@ -75,7 +88,7 @@
 
                       <div class="field">
                         <% if can? :create, User %>
-                          <%= form.label :user_id %>
+                          <%# form.label :user_id %>
                           <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "user_id-#{i.to_s}#{day.to_s}" }) %>
                         <% else %>
                           <%= form.hidden_field :user_id, value: current_user.id, :class => "user_id-#{i.to_s}#{day.to_s}" %>
@@ -92,13 +105,96 @@
                 </div>
               </div>
             </div>
+            
+            <% if reservat  %>
+              <!-- Modal View / update -->
+              <div class="modal fade" id="update-model-<%= i.to_s + day.to_s %>" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <%= form_for(Reservation.find_by(data: "#{day} #{i}:00:00"), :controller => 'reservations', :action => 'update', :html => {:class => "form-update-#{i.to_s}#{day.to_s}"}) do |form| %>
+                      
+                        <% if reservation.errors.any? %>
+                          <div id="error_explanation">
+                            <h2><%= pluralize(reservation.errors.count, "error") %> prohibited this reservation from being saved:</h2>
 
+                            <ul>
+                              <% reservation.errors.each do |error| %>
+                                <li><%= error.full_message %></li>
+                              <% end %>
+                            </ul>
+                          </div>
+                        <% end %>
+
+                        <div class="field">
+                          <%= form.hidden_field :data, :value => Time.parse("#{day} #{i}:00:00").strftime("%Y-%m-%d %H:%M:%S"), :class => "data-#{i.to_s}#{day.to_s}"  %>
+                        </div>
+
+                        <div class="form-group form-group-<%= i.to_s+day.to_s %>">
+                          <%= form.label :description %>
+                          <%= form.text_field :description, :class => "form-control description-update-#{i.to_s}#{day.to_s}" %>
+                          <span class="span-update-<%= i.to_s+day.to_s %>">** preencha o campo</span>
+                        </div>
+
+                        <div class="field">
+                          <% if can? :create, User %>
+                            <%# form.label :user_id %>
+                            <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "user_id-#{i.to_s}#{day.to_s}" }) %>
+                          <% else %>
+                            <%= form.hidden_field :user_id, value: current_user.id, :class => "user_id-#{i.to_s}#{day.to_s}" %>
+                          <% end %>
+                        </div>
+
+                      <% end %>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary submit-button-update" id="<%= i.to_s + day.to_s %>">Confirm</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modal Delete -->
+              <div class="modal fade deletar" id="delete-model-<%= i.to_s + day.to_s %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+
+                      <div class="modal-body">
+                        Are you sure?
+                      </div>
+                      <!-- Delete button in the footer -->
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-danger delete-reservation" data-dismiss="modal" id="<%= i.to_s + day.to_s %>" value="<%= reservat[:id] %>">Destroy</button>
+                        <!-- link_to 'Destroy', reservat, method: :delete, class: "btn btn-outline-danger delete-reservation" -->
+                      </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
           <% end %>
         <% } %>
       </tr>
     <% end %>
   </tbody>
 </table>
+
+<div id="div-new"></div>
+<div id="div-delete"></div>
 <%# params[:date] %>
 <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %>
 <%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
@@ -106,8 +202,13 @@
 <script>
     $(document).ready(function () {
         var AUTH_TOKEN = $('meta[name=csrf-token]').attr('content');
-        $('.submit-button').click(function() {
-            
+        
+        $(document).on('click', '.submit-button', function(event) {
+          event.preventDefault();
+            var this_id = this.id;
+            var this_data = $(".data-"+this_id).val();
+            var form = $("#staticBackdrop-"+this.id).html();
+            var admin = '<%= current_user.admin? %>';
             if (!$(".description-"+this.id).val()) {
               $(".span-"+this.id).addClass('text-danger');
               return false
@@ -125,13 +226,70 @@
                 	console.log(111, error);
                 },
                 success: function(data) {
-                    //console.log(222, data);
-                
-                    $(".table").load("<%= request.base_url %>/reservations/new #table");
+                  // console.log(data);
+                  // console.log(data.id);
 
+                  $('#div-new').append('<div class="modal fade" id="update-model-'+this_id+'" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="staticBackdropLabel">Modal title</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><form class="form-update-'+this_id+'" id="edit_reservation_'+data.id+'" action="/reservations/'+data.id+'" accept-charset="UTF-8" method="post"><input type="hidden" name="_method" value="patch" /><input type="hidden" name="authenticity_token" value="'+AUTH_TOKEN+'" /><div class="field"><input value="'+this_data+'" class="data-'+this_id+'" type="hidden" name="reservation[data]" id="reservation_data" /></div><div class="form-group form-group-'+this_id+'"><label for="reservation_description">Description</label><input class="form-control description-update-'+this_id+'" type="text" value="'+data.description+'" name="reservation[description]" id="reservation_description" /><span class="span-update-'+this_id+'">** preencha o campo</span></div><div class="field"><input value="'+data.user_id+'" class="user_id-'+this_id+'" type="hidden" name="reservation[id]" id="reservation_user_id" /></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button><button type="button" class="btn btn-primary submit-button-update" id="'+this_id+'">Confirm</button></div></div></div></div>');
+                  var select_option_value = $('.user_id-'+this_id+' option:selected').val();
+                  var select_option = $('.user_id-'+this_id).html();
+                  $('.user_id-'+this_id).parent().append('<select class="user_id-'+this_id+'" name="reservation[user_id]" id="reservation_user_id">' + select_option  + '</select>');
+                  $('select.user_id-'+this_id+' option[value='+select_option_value+']').attr('selected', 'selected');
+                  $('#div-delete').append('<div class="modal fade" id="delete-model-'+this_id+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Delete Confirmation</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">Are you sure?</div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-outline-danger delete-reservation" data-dismiss="modal" id="'+this_id+'" value="'+data.id+'">Destroy</button></div></div></div></div>');
+                  $('.table').load("<%= request.base_url %>/reservations/new #table");
+                  
                 },
                 type: 'POST'
             });
         });
-    })
+
+        /// UPDATE
+        $(document).on('click', '.submit-button-update', function(event) {
+          event.preventDefault();
+
+          if (!$(".description-update-"+this.id).val()) {
+            $(".span-update-"+this.id).addClass('text-danger');
+            return false
+          }else{
+            $("#update-model-"+this.id).modal('toggle');
+            $(".span-update-"+this.id).removeClass('text-danger');
+          }
+
+          $.ajax({
+              url: $(".form-update-"+this.id).attr("action") + "?&authenticity_token=" + AUTH_TOKEN, 
+              data: $(".form-update-"+this.id).serialize(),
+              //dataType: "script",
+              type: "json",
+              error: function(error) {
+                console.log(111, error);
+              },
+              success: function(data) {
+                  // console.log(222, data);
+                  $(".table").load("<%= request.base_url %>/reservations/new #table");
+              },
+              type: 'POST'
+          });
+        });
+
+      // DELETE
+      $(document).on('click', '.delete-reservation', function(event) {
+        event.preventDefault();
+        
+        $("#delete-model-"+this.id).modal('toggle');
+        
+        $.ajax({
+            url: "/reservations/" + this.value + "?&authenticity_token=" + AUTH_TOKEN, 
+            data: $(".form-delete-"+this.id).serialize(),
+            //dataType: "script",
+            type: "json",
+            error: function(error) {
+              console.log(error);
+            },
+            success: function(data) {
+              $(".table").load("<%= request.base_url %>/reservations/new #table");
+            },
+            type: 'DELETE'
+        });
+      });
+
+    });
 </script>
