@@ -55,8 +55,8 @@
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Reserva</h5>
-                    <button type="button" class="Fechar" data-dismiss="modal" aria-label="Fechar">
+                    <h5 class="modal-title" id="staticBackdropLabel">Reserva <small><%= Time.parse("#{day} #{i}:00:00").strftime("%d/%m/%Y %H:%M") %></small></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -76,7 +76,7 @@
                       <div class="field">
                         <% if can? :create, User %>
                           <%# form.label :user_id %>
-                          <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "user_id-#{i.to_s}#{day.to_s}" }) %>
+                          <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "form-control user_id-#{i.to_s}#{day.to_s}" }) %>
                         <% else %>
                           <%= form.hidden_field :user_id, value: current_user.id, :class => "user_id-#{i.to_s}#{day.to_s}" %>
                         <% end %>
@@ -99,8 +99,8 @@
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="staticBackdropLabel">Reserva</h5>
-                      <button type="button" class="Fechar" data-dismiss="modal" aria-label="Fechar">
+                      <h5 class="modal-title" id="staticBackdropLabel">Reserva <small><%= Time.parse("#{day} #{i}:00:00").strftime("%d/%m/%Y %H:%M") %></small></h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="close">
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
@@ -120,7 +120,7 @@
                         <div class="field">
                           <% if can? :create, User %>
                             <%# form.label :user_id %>
-                            <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "user_id-#{i.to_s}#{day.to_s}" }) %>
+                            <%= form.select(:user_id, @users.collect { |user| [user.name, user.id] } , {:include_blank => 'Selecione'}, { :class => "form-control user_id-#{i.to_s}#{day.to_s}" }) %>
                           <% else %>
                             <%= form.hidden_field :user_id, value: current_user.id, :class => "user_id-#{i.to_s}#{day.to_s}" %>
                           <% end %>
@@ -143,7 +143,7 @@
 
                       <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Confirmaração de exclusão</h5>
-                        <button type="button" class="Fechar" data-dismiss="modal" aria-label="Fechar">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="close">
                         <span aria-hidden="true">&times;</span>
                         </button>
                       </div>
@@ -171,25 +171,39 @@
 <div id="div-new"></div>
 <div id="div-delete"></div>
 <%# params[:date] %>
-<%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %>
-<%= new_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
+<% beginning_week = Date.parse(today.beginning_of_week.strftime('%d/%m/%Y')) %>
+<% previous_week = Date.parse(today.beginning_of_week.strftime('%d/%m/%Y')) - 1 %>
+<% next_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item disabled">
+      <a class="page-link" href="#" tabindex="-1"><%= previous_week %></a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="#"><%= next_week %></a>
+    </li>
+  </ul>
+</nav>
 
 <script>
     $(document).ready(function () {
         var AUTH_TOKEN = $('meta[name=csrf-token]').attr('content');
         
         $(document).on('click', '.submit-button', function(event) {
-          event.preventDefault();
-            var this_id = this.id;
-            var this_data = $(".data-"+this_id).val();
+          
+            var this_id = this.id; // ID DO CAMPO, DIV
+            var this_data = $(".data-"+this_id).val(); // DATA 
             var form = $("#staticBackdrop-"+this.id).html();
-            var admin = '<%= current_user.admin? %>';
-            if (!$(".description-"+this.id).val()) {
+   
+            if (!$(".description-"+this.id).val() || !$(".user_id-"+this.id).val()) {
               $(".span-"+this.id).addClass('text-danger');
-              return false
+              $(".user_id-"+this.id).addClass('text-danger');
+              return false;
             }else{
               $("#staticBackdrop-"+this.id).modal('toggle');
               $(".span-"+this.id).removeClass('text-danger');
+              $(".user_id-"+this.id).removeClass('text-danger');
             }
 
             $.ajax({
@@ -201,25 +215,30 @@
                 	console.log(111, error);
                 },
                 success: function(data) {
-                  // console.log(data);
-                  // console.log(data.id);
+                  console.log(data);
+                  console.log(data.id);
 
-                  $('#div-new').append('<div class="modal fade" id="update-model-'+this_id+'" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="staticBackdropLabel">Reserva</h5><button type="button" class="Fechar" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><form class="form-update-'+this_id+'" id="edit_reservation_'+data.id+'" action="/reservations/'+data.id+'" accept-charset="UTF-8" method="post"><input type="hidden" name="_method" value="patch" /><input type="hidden" name="authenticity_token" value="'+AUTH_TOKEN+'" /><div class="field"><input value="'+this_data+'" class="data-'+this_id+'" type="hidden" name="reservation[data]" id="reservation_data" /></div><div class="form-group form-group-'+this_id+'"><label for="reservation_description">Description</label><input class="form-control description-update-'+this_id+'" type="text" value="'+data.description+'" name="reservation[description]" id="reservation_description" /><span class="span-update-'+this_id+'">** preencha o campo</span></div><div class="field"><input value="'+data.user_id+'" class="user_id-'+this_id+'" type="hidden" name="reservation[id]" id="reservation_user_id" /></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button><button type="button" class="btn btn-primary submit-button-update" id="'+this_id+'">Confirmar</button></div></div></div></div>');
+                  var myDate = new Date(Date.parse(this_data));
+                  var dateNow = ('0' + myDate.getDate()).slice(-2) + '/' +('0' + (myDate.getMonth()+1)).slice(-2)+ '/' + myDate.getFullYear() + ' '+myDate.getHours()+ ':'+('0' + (myDate.getMinutes())).slice(-2);
+    
+                  $('#div-new').append('<div class="modal fade" id="update-model-'+this_id+'" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="staticBackdropLabel">Reserva '+dateNow+'</h5><button type="button" class="close" data-dismiss="modal" aria-label="close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><form class="form-update-'+this_id+'" id="edit_reservation_'+data.id+'" action="/reservations/'+data.id+'" accept-charset="UTF-8" method="post"><input type="hidden" name="_method" value="patch" /><input type="hidden" name="authenticity_token" value="'+AUTH_TOKEN+'" /><div class="field"><input value="'+this_data+'" class="data-'+this_id+'" type="hidden" name="reservation[data]" id="reservation_data" /></div><div class="form-group form-group-'+this_id+'"><label for="reservation_description">Description</label><input class="form-control description-update-'+this_id+'" type="text" value="'+data.description+'" name="reservation[description]" id="reservation_description" /><span class="span-update-'+this_id+'">** preencha o campo</span></div><div class="field"><input value="'+data.user_id+'" class="user_id-'+this_id+'" type="hidden" name="reservation[id]" id="reservation_user_id" /></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button><button type="button" class="btn btn-primary submit-button-update" id="'+this_id+'">Confirmar</button></div></div></div></div>');
                   
                   var select_option_value = $('.user_id-'+this_id+' option:selected').val();
                   var select_option = $('.user_id-'+this_id).html();
                   
                   if(select_option){
-                    $('.user_id-'+this_id).parent().append('<select class="user_id-'+this_id+'" name="reservation[user_id]" id="reservation_user_id">' + select_option  + '</select>');
+                    $('.user_id-'+this_id).eq(1).parent().append('<select class="form-control user_id-'+this_id+'" name="reservation[user_id]" id="reservation_user_id">' + select_option  + '</select>');
                   }
 
+                  $('#delete-model-'+this_id).remove();
                   $('select.user_id-'+this_id+' option[value='+select_option_value+']').attr('selected', 'selected');
-                  $('#div-delete').append('<div class="modal fade" id="delete-model-'+this_id+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Confirmaração de exclusão</h5><button type="button" class="Fechar" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">Tem certeza?</div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-outline-danger delete-reservation" data-dismiss="modal" id="'+this_id+'" value="'+data.id+'">Excluir</button></div></div></div></div>');
+                  $('#div-delete').append('<div class="modal fade" id="delete-model-'+this_id+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Confirmaração de exclusão</h5><button type="button" class="close" data-dismiss="modal" aria-label="close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">Tem certeza?</div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-outline-danger delete-reservation" data-dismiss="modal" id="'+this_id+'" value="'+data.id+'">Excluir</button></div></div></div></div>');
                   $('.table').load("<%= request.base_url %>/reservations/new #table");
                   
                 },
                 type: 'POST'
             });
+            event.preventDefault();
         });
 
         /// UPDATE
@@ -245,6 +264,7 @@
               success: function(data) {
                   // console.log(222, data);
                   $(".table").load("<%= request.base_url %>/reservations/new #table");
+                   
               },
               type: 'POST'
           });
@@ -253,9 +273,10 @@
       // DELETE
       $(document).on('click', '.delete-reservation', function(event) {
         event.preventDefault();
-        
+        var this_id = this.id; // ID DO CAMPO, DIV
         $("#delete-model-"+this.id).modal('toggle');
         
+
         $.ajax({
             url: "/reservations/" + this.value + "?&authenticity_token=" + AUTH_TOKEN, 
             data: $(".form-delete-"+this.id).serialize(),
@@ -265,6 +286,8 @@
               console.log(error);
             },
             success: function(data) {
+             $('#update-model-'+this_id).remove();
+              // $('#delete-model-'+this_id).html("");
               $(".table").load("<%= request.base_url %>/reservations/new #table");
             },
             type: 'DELETE'

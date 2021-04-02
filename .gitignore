@@ -36,3 +36,4 @@ yarn-debug.log*
 .yarn-integrity
 config/locales/pt-BR.yml
 config/.DS_Store
+app/views/reservations/_form.html.erb
