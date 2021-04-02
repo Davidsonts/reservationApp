@@ -37,14 +37,14 @@
                 <% end %>
 
                 <% if current_user.id == reservat[:user_id] || current_user.admin? %>
-                  <a type="button" class="text-dark" data-toggle="modal" data-target="#delete-model-<%= i.to_s + day.to_s %>">
+                  <a type="button" class="text-dark delete-model-a" data-toggle="modal" data-target="#delete-model-<%= i.to_s + day.to_s %>">
                     <i class="fa fa-undo" aria-hidden="true"></i> 
                   </a>
                 <% end %>
 
               <% else %>
                 <!-- Button trigger modal -->
-                <a type="button" class="text-primary" data-toggle="modal" data-target="#staticBackdrop-<%= i.to_s + day.to_s %>">
+                <a type="button" class="text-primary disponivel" data-toggle="modal" data-target="#staticBackdrop-<%= i.to_s + day.to_s %>">
                   <%= "Disponivel" %>
                 </a>
               <% end %>
@@ -173,25 +173,52 @@
 <%# params[:date] %>
 <% beginning_week = Date.parse(today.beginning_of_week.strftime('%d/%m/%Y')) %>
 <% previous_week = Date.parse(today.beginning_of_week.strftime('%d/%m/%Y')) - 1 %>
+<% now_week = Date.parse(Date.today.strftime('%d/%m/%Y')) %>
 <% next_week = Date.parse(today.end_of_week.strftime('%d/%m/%Y')) + 1 %>
+<% next_week_more = next_week + 1 %>
+<% unavailable = 0 %>
+<% if params[:date] && Date.parse(Date.today.beginning_of_week.strftime('%d/%m/%Y')) > Date.parse(Date.parse(params[:date]).strftime('%d/%m/%Y')) %>
+  <% unavailable = 1 %>
+<% end %>
 
 <nav aria-label="Page navigation example">
   <ul class="pagination justify-content-center">
-    <li class="page-item disabled">
-      <a class="page-link" href="#" tabindex="-1"><%= previous_week %></a>
+    <li class="page-item"> 
+    <%# disabled %>
+    <%# href="#" tabindex="-1" %>
+      <a class="page-link week-reservation" href="#" id="<%= previous_week %>"><%= Date.parse(previous_week.strftime('%d/%m/%Y')) %></a>
     </li>
     <li class="page-item">
-      <a class="page-link" href="#"><%= next_week %></a>
+      <a class="page-link week-reservation" href="#" id="<%= now_week %>"> HOJE </a>
+    </li>
+    <li class="page-item">
+      <a class="page-link week-reservation" href="#" id="<%= next_week %>"><%= Date.parse(next_week.strftime('%d/%m/%Y')) %></a>
     </li>
   </ul>
 </nav>
 
-<script>
+<script type="text/javascript" data-turbolinks-eval=false>
     $(document).ready(function () {
+       
+        var unavailable = '<%= unavailable %>';
+        var admin = '<%= current_user.admin %>';
+
+        if(unavailable == 1 && admin == 'false'){
+          $('.disponivel').html('indisponível');
+          $('[class^=span-update]').html('');
+          $('.delete-model-a').hide();
+          $('.disponivel').attr('data-target','#nullModal');
+          $("input[type='text']").prop("disabled", true);
+          $('.disponivel').removeClass('text-primary'); 
+          $('.disponivel').addClass('text-danger');
+          $('.submit-button-update').hide();
+        }
+
         var AUTH_TOKEN = $('meta[name=csrf-token]').attr('content');
         
         $(document).on('click', '.submit-button', function(event) {
-          
+          event.preventDefault();
+         
             var this_id = this.id; // ID DO CAMPO, DIV
             var this_data = $(".data-"+this_id).val(); // DATA 
             var form = $("#staticBackdrop-"+this.id).html();
@@ -233,12 +260,13 @@
                   $('#delete-model-'+this_id).remove();
                   $('select.user_id-'+this_id+' option[value='+select_option_value+']').attr('selected', 'selected');
                   $('#div-delete').append('<div class="modal fade" id="delete-model-'+this_id+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Confirmaração de exclusão</h5><button type="button" class="close" data-dismiss="modal" aria-label="close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">Tem certeza?</div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-outline-danger delete-reservation" data-dismiss="modal" id="'+this_id+'" value="'+data.id+'">Excluir</button></div></div></div></div>');
-                  $('.table').load("<%= request.base_url %>/reservations/new #table");
+                  //$('.table').load("<%= request.base_url %>/reservations/new #table");
+                  $('.table').load(window.location.href + " #table");
                   
                 },
                 type: 'POST'
             });
-            event.preventDefault();
+            
         });
 
         /// UPDATE
@@ -263,7 +291,8 @@
               },
               success: function(data) {
                   // console.log(222, data);
-                  $(".table").load("<%= request.base_url %>/reservations/new #table");
+                 // $(".table").load("<%= request.base_url %>/reservations/new #table");
+                  $('.table').load(window.location.href + " #table");
                    
               },
               type: 'POST'
@@ -288,11 +317,24 @@
             success: function(data) {
              $('#update-model-'+this_id).remove();
               // $('#delete-model-'+this_id).html("");
-              $(".table").load("<%= request.base_url %>/reservations/new #table");
+              $('.table').load(window.location.href + " #table");
             },
             type: 'DELETE'
         });
       });
 
-    });
+      $(document).on('click', '.week-reservation', function(event) {
+        event.preventDefault();
+        console.log(55, $(this).attr('id'));
+        var date = $(this).attr('id');
+        var new_url = "<%= request.base_url %>/?date=" + date;
+        window.history.pushState("", "", new_url);
+        document.location.reload(true);        
+      });
+
+    }); // document ready
+
+
+
+
 </script>
