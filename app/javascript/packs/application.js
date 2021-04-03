@@ -24,7 +24,7 @@ $( document ).ready(function() {
   if(loc[1] == 'signin'){  
     $('h2').hide();
     $('.container-fluid a').hide();
-    $('.user_remember_me').hide();wrapper
+    $('.user_remember_me').hide();
     
     $('#user_email').addClass('form-control');
     $('#user_password').addClass('form-control');
