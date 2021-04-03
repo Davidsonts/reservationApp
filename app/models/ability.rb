@@ -15,10 +15,10 @@ class Ability
     #   user ||= User.new # guest user (not logged in)
     if user.admin?
       #can :manage, :all
-      can [:read, :new, :create, :update, :destroy], User
+      can [:read, :new, :show, :create, :update, :destroy], User
       can [:new, :create, :update, :destroy], Reservation
     else
-      can [:update], User
+      can [:update, :show], User
       can [:new, :create, :update, :destroy], Reservation
     end
     #
