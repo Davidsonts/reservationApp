@@ -34,11 +34,10 @@
             <%= active_link_to "Usuário: #{current_user.name}", edit_user_path(current_user), active: :exclusive, :class => "nav-link" %>
           </li>
            
-          <% end %>
-
           <li class="nav-item">
             <%= link_to "Sair", destroy_user_session_path, method: :delete, :class => 'nav-link'  %>
           </li>
+          <% end %>
         </ul>
       </div>
     </nav>
