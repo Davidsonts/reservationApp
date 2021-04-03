@@ -12,7 +12,7 @@ class ReservationsTest < ApplicationSystemTestCase
 
   test "creating a Reservation" do
     visit reservations_url
-    click_on "New Reservation"
+    click_on "Reserva de Sala"
 
     fill_in "Data", with: @reservation.data
     fill_in "Description", with: @reservation.description
