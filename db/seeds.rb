@@ -12,26 +12,26 @@ User.create name: 'João', admin: :false, email: 'joao@gmail.com', password: 123
 User.create name: 'Dudu', admin: :false, email: 'dudu@gmail.com', password: 123456, password_confirmation: 123456
 User.create name: 'Lana', admin: :false, email: 'Lana@gmail.com', password: 123456, password_confirmation: 123456
 
-Registration.create data: '2021-03-26 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 2
-Registration.create data: '2021-03-26 07:00:00', description: 'consectetur adipiscing elit', user_id: 2
-Registration.create data: '2021-03-30 08:00:00', description: 'consectetur adipiscing elit', user_id: 2
-Registration.create data: '2021-03-30 09:00:00', description: 'consectetur adipiscing elit', user_id: 2
-Registration.create data: '2021-03-26 22:00:00', description: 'consectetur adipiscing elit', user_id: 2
+Reservation.create data: '2021-03-26 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 2
+Reservation.create data: '2021-03-26 07:00:00', description: 'consectetur adipiscing elit', user_id: 2
+Reservation.create data: '2021-03-30 08:00:00', description: 'consectetur adipiscing elit', user_id: 2
+Reservation.create data: '2021-03-30 09:00:00', description: 'consectetur adipiscing elit', user_id: 2
+Reservation.create data: '2021-03-26 22:00:00', description: 'consectetur adipiscing elit', user_id: 2
 
-Registration.create data: '2021-03-01 06:00:00', description: 'consectetur adipiscing elit', user_id: 3
-Registration.create data: '2021-03-01 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
-Registration.create data: '2021-03-01 08:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
-Registration.create data: '2021-03-01 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
-Registration.create data: '2021-03-01 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
+Reservation.create data: '2021-03-01 06:00:00', description: 'consectetur adipiscing elit', user_id: 3
+Reservation.create data: '2021-03-01 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
+Reservation.create data: '2021-03-01 08:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
+Reservation.create data: '2021-03-01 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
+Reservation.create data: '2021-03-01 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 3
 
-Registration.create data: '2021-03-02 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
-Registration.create data: '2021-03-02 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
-Registration.create data: '2021-03-02 08:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
-Registration.create data: '2021-03-02 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
-Registration.create data: '2021-03-02 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
+Reservation.create data: '2021-03-02 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
+Reservation.create data: '2021-03-02 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
+Reservation.create data: '2021-03-02 08:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
+Reservation.create data: '2021-03-02 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
+Reservation.create data: '2021-03-02 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 4
 
-Registration.create data: '2021-03-03 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
-Registration.create data: '2021-03-03 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
-Registration.create data: '2021-04-03 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
-Registration.create data: '2021-03-03 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
-Registration.create data: '2021-04-03 20:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
+Reservation.create data: '2021-03-03 06:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
+Reservation.create data: '2021-03-03 07:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
+Reservation.create data: '2021-04-03 22:00:00', description: 'lorem ipsum dolor sit amet', user_id: 5
+Reservation.create data: '2021-03-03 09:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
+Reservation.create data: '2021-04-03 20:00:00', description: 'lorem ipsum dolor sit amet', user_id: 6
